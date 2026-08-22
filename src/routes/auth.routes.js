@@ -1,8 +1,10 @@
 import express from "express";
 import {
   loginUserController,
+  logoutUserController,
   registerUserController,
 } from "../controllers/user.controller.js";
+import { authMiddleware } from "../middlewares/auth.middleware.js";
 
 const authRouter = express.Router();
 
@@ -19,5 +21,12 @@ authRouter.post("/register", registerUserController);
  * @access Public
  */
 authRouter.post("/login", loginUserController);
+
+/**
+ * @route GET /api/v1/auth/logout
+ * @description clear token from user cookie and add the token in blacklist
+ * @access Private
+ */
+authRouter.get("/logout", authMiddleware, logoutUserController);
 
 export default authRouter;

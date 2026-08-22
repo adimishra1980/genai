@@ -1,6 +1,7 @@
 import userModel from "../models/user.model.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import { redisClient } from "../config/redis.js";
 
 /**
  * @name registerUserController
@@ -39,7 +40,7 @@ export const registerUserController = async (req, res) => {
       expiresIn: "1d",
     });
 
-    res.cookie("authToken", token, {
+    res.cookie("token", token, {
       httpOnly: true,
       secure: true,
       sameSite: "strict",
@@ -93,7 +94,7 @@ export const loginUserController = async (req, res) => {
       expiresIn: "1d",
     });
 
-    res.cookie("authToken", token, {
+    res.cookie("token", token, {
       httpOnly: true,
       secure: true,
       sameSite: "strict",
@@ -113,3 +114,40 @@ export const loginUserController = async (req, res) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 };
+
+/**
+ * @name logoutUserController
+ * @description clear token from user cookie and add the token in blacklist
+ * @access public
+ */
+export const logoutUserController = async (req, res) => {
+  try {
+    const token = req.cookies.token;
+
+    if (!token) {
+      return res.status(401).json({ message: "No token provided" });
+    }
+
+    // decode the token to get expiry time for Redis TTL
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const ttl = decoded.exp - Math.floor(Date.now() / 1000);
+
+    // blacklist the token in Redis with TTL matching remaining expiry
+    if (ttl > 0) {
+      await redisClient.setex(`blacklist:${token}`, ttl, "true");
+    }
+
+    // clear the cookie
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "strict",
+    });
+
+    return res.status(200).json({ message: "Logged out successfully" });
+  } catch (error) {
+    console.log("Logout error:", error.message);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
