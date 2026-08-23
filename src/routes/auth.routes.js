@@ -1,5 +1,6 @@
 import express from "express";
 import {
+  getMeController,
   loginUserController,
   logoutUserController,
   registerUserController,
@@ -28,5 +29,12 @@ authRouter.post("/login", loginUserController);
  * @access Private
  */
 authRouter.get("/logout", authMiddleware, logoutUserController);
+
+/**
+ * @route GET /api/auth/get-me
+ * @description get the current logged in user details
+ * @access private
+ */
+authRouter.get("/get-me", authMiddleware, getMeController);
 
 export default authRouter;

@@ -66,7 +66,7 @@ export const registerUserController = async (req, res) => {
  * @description login a user, expects email and password in the request body
  * @access Public
  */
-export const loginUserController = async (req, res) => {
+ export const loginUserController = async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -151,3 +151,20 @@ export const logoutUserController = async (req, res) => {
   }
 };
 
+/**
+ * @name getMeController
+ * @description get the current logged in user details.
+ * @access private
+ */
+export const getMeController = async (req, res) => {
+  try {
+    const user = await userModel.findById(req.user.id).select("-password");
+    return res.status(200).json({
+      message: "User details fetched successfully",
+      user,
+    });
+  } catch (error) {
+    console.log("Error fetching user details:", error.message);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
