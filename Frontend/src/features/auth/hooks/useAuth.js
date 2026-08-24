@@ -8,31 +8,55 @@ export const useAuth = () => {
     throw new Error("useAuth must be used within an AuthProvider");
   }
 
-  const { user, setUser, loading, setLoading } = context;
+  const { user, setUser, loading, setLoading, error, setError } = context;
 
   const handleLogin = async ({ email, password }) => {
-    const data = await login({ email, password });
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await login({ email, password });
 
-    if (data) {
-      setUser(data.user);
+      if (data) {
+        setUser(data.user);
+      }
+    } catch (error) {
+      console.log(error);
+      setError(error.response?.data?.message || "Login failed");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleRegister = async ({ email, password, username }) => {
-    const data = await register({ email, username, password });
+    setError(null);
+    setLoading(true);
+    try {
+      const data = await register({ email, username, password });
 
-    if (data) {
-      setUser(data.user);
+      if (data) {
+        setUser(data.user);
+      }
+    } catch (error) {
+      console.log(error);
+      setError(error.response?.data?.message || "Registration failed");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleLogout = async () => {
-    await logout();
-    setUser(null);
-    setLoading(false);
+    setLoading(true);
+    setError(null);
+    try {
+      await logout();
+      setUser(null);
+    } catch (error) {
+      console.log(error);
+      setError(error.response?.data?.message || "Logout failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  return { user, loading, handleLogin, handleRegister, handleLogout };
+  return { user, loading, error, handleLogin, handleRegister, handleLogout };
 };

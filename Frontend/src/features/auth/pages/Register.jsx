@@ -1,12 +1,22 @@
 import { useNavigate, Link } from "react-router";
 import "../auth.form.scss";
+import { useState } from "react";
+import { useAuth } from "../hooks/useAuth";
+import { LoaderCircle } from "lucide-react";
 
 const Register = () => {
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
   const navigate = useNavigate();
+
+  const { loading, error, register } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    navigate("/login");
+    await register({ username, email, password });
+    navigate("/");
   };
 
   return (
@@ -22,6 +32,8 @@ const Register = () => {
               id="username"
               name="username"
               placeholder="Enter your username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
             />
           </div>
 
@@ -32,6 +44,8 @@ const Register = () => {
               id="email"
               name="email"
               placeholder="Enter your email address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
 
@@ -42,15 +56,31 @@ const Register = () => {
               id="password"
               name="password"
               placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
             />
           </div>
 
-          <button type="submit" className="button primary-button">
-            Register
+          <button
+            type="submit"
+            className="button primary-button"
+            disabled={loading}
+          >
+            {loading ? (
+              <>
+                <LoaderCircle className="loader" />
+              </>
+            ) : (
+              "Register"
+            )}
           </button>
         </form>
 
-        <p className="account-text">Already have an account? <Link to="/login">Sign In</Link></p>
+        {error && <p className="error-text">{error}</p>}
+
+        <p className="account-text">
+          Already have an account? <Link to="/login">Sign In</Link>
+        </p>
       </div>
     </main>
   );
