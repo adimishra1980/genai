@@ -1,8 +1,8 @@
-import { useNavigate, Link } from "react-router";
-import "../auth.form.scss";
 import { useState } from "react";
-import { useAuth } from "../hooks/useAuth";
+import { useNavigate, Link } from "react-router";
 import { LoaderCircle } from "lucide-react";
+import "../auth.form.scss";
+import { useAuth } from "../hooks/useAuth.ts";
 
 const Register = () => {
   const [username, setUsername] = useState("");
@@ -11,11 +11,13 @@ const Register = () => {
 
   const navigate = useNavigate();
 
-  const { loading, error, register } = useAuth();
+  const { loading, error, handleRegister } = useAuth();
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (
+    e: React.FormEvent<HTMLFormElement>,
+  ): Promise<void> => {
     e.preventDefault();
-    await register({ username, email, password });
+    await handleRegister({ username, email, password });
     navigate("/");
   };
 

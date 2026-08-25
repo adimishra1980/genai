@@ -1,9 +1,9 @@
 import "../auth.form.scss";
 import { Link } from "react-router";
-import { useAuth } from "../hooks/useAuth";
 import { useState } from "react";
 import { LoaderCircle } from "lucide-react";
 import { useNavigate } from "react-router";
+import { useAuth } from "../hooks/useAuth.ts";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -12,7 +12,9 @@ const Login = () => {
 
   const { loading, error, handleLogin } = useAuth();
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (
+    e: React.FormEvent<HTMLFormElement>,
+  ): Promise<void> => {
     e.preventDefault();
 
     await handleLogin({ email, password });

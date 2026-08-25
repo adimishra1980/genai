@@ -1,10 +1,14 @@
 import { LoaderCircle } from "lucide-react";
-import { useAuth } from "../hooks/useAuth";
 import { Navigate } from "react-router";
+import { ReactNode } from "react";
+import { useAuth } from "../hooks/useAuth.ts";
 
-const Protected = ({ children }) => {
+interface ProtectedProps {
+  children: ReactNode;
+}
+
+const Protected = ({ children }: ProtectedProps) => {
   const { loading, user } = useAuth();
-
 
   if (loading) {
     return (
