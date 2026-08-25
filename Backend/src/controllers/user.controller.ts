@@ -1,14 +1,21 @@
-import userModel from "../models/user.model.js";
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import { Request, Response } from "express";
+
+import userModel from "../models/user.model.js";
 import { redisClient } from "../config/redis.js";
+
+import { RegisterRequestBody, LoginRequestBody } from "../types/auth.types.js";
 
 /**
  * @name registerUserController
  * @description register a new user, expects username, email and password in the request body
  * @access Public
  */
-export const registerUserController = async (req, res) => {
+export const registerUserController = async (
+  req: Request<{}, {}, RegisterRequestBody>,
+  res: Response,
+): Promise<Response> => {
   try {
     const { username, email, password } = req.body;
 
@@ -36,7 +43,15 @@ export const registerUserController = async (req, res) => {
       password: passwordHash,
     });
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+    const secret = process.env.JWT_SECRET;
+
+    if (!secret) {
+      return res
+        .status(500)
+        .json({ message: "env vars not configured properly" });
+    }
+
+    const token = jwt.sign({ id: user._id }, secret, {
       expiresIn: "1d",
     });
 
@@ -55,8 +70,9 @@ export const registerUserController = async (req, res) => {
         email: user.email,
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.log(error);
+
     return res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -66,7 +82,10 @@ export const registerUserController = async (req, res) => {
  * @description login a user, expects email and password in the request body
  * @access Public
  */
- export const loginUserController = async (req, res) => {
+export const loginUserController = async (
+  req: Request<{}, {}, LoginRequestBody>,
+  res: Response,
+): Promise<Response> => {
   try {
     const { email, password } = req.body;
 
@@ -90,7 +109,15 @@ export const registerUserController = async (req, res) => {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+    const secret = process.env.JWT_SECRET;
+
+    if (!secret) {
+      return res
+        .status(500)
+        .json({ message: "env vars not configured properly" });
+    }
+
+    const token = jwt.sign({ id: user._id }, secret, {
       expiresIn: "1d",
     });
 
@@ -109,8 +136,9 @@ export const registerUserController = async (req, res) => {
         email: user.email,
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.log(error);
+
     return res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -120,7 +148,10 @@ export const registerUserController = async (req, res) => {
  * @description clear token from user cookie and add the token in blacklist
  * @access public
  */
-export const logoutUserController = async (req, res) => {
+export const logoutUserController = async (
+  req: Request,
+  res: Response,
+): Promise<Response> => {
   try {
     const token = req.cookies.token;
 
@@ -128,8 +159,23 @@ export const logoutUserController = async (req, res) => {
       return res.status(401).json({ message: "No token provided" });
     }
 
+    const secret = process.env.JWT_SECRET;
+
+    if (!secret) {
+      return res
+        .status(500)
+        .json({ message: "env vars not configured properly" });
+    }
+
     // decode the token to get expiry time for Redis TTL
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, secret) as JwtPayload;
+
+    if (!decoded.exp) {
+      return res.status(401).json({
+        message: "Invalid token",
+      });
+    }
+
     const ttl = decoded.exp - Math.floor(Date.now() / 1000);
 
     // blacklist the token in Redis with TTL matching remaining expiry
@@ -145,8 +191,9 @@ export const logoutUserController = async (req, res) => {
     });
 
     return res.status(200).json({ message: "Logged out successfully" });
-  } catch (error) {
-    console.log("Logout error:", error.message);
+  } catch (error: unknown) {
+    console.log("Logout error:", error);
+
     return res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -154,17 +201,22 @@ export const logoutUserController = async (req, res) => {
 /**
  * @name getMeController
  * @description get the current logged in user details.
- * @access private
+ * @access Private
  */
-export const getMeController = async (req, res) => {
+export const getMeController = async (
+  req: Request,
+  res: Response,
+): Promise<Response> => {
   try {
     const user = await userModel.findById(req.user.id).select("-password");
+
     return res.status(200).json({
       message: "User details fetched successfully",
       user,
     });
-  } catch (error) {
-    console.log("Error fetching user details:", error.message);
+  } catch (error: unknown) {
+    console.log("Error fetching user details:", error);
+
     return res.status(500).json({ message: "Internal server error" });
   }
 };

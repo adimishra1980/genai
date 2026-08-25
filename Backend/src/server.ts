@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
-import { app } from "./src/app.js";
-import connectToDB from "./src/config/database.js";
-import { connectToRedis } from "./src/config/redis.js";
+import { app } from "./app.js";
+import connectToDB from "./config/database.js";
+import { connectToRedis } from "./config/redis.js";
 
 dotenv.config();
 

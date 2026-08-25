@@ -1,22 +1,21 @@
-import Redis from "ioredis";
+import { Redis } from "ioredis";
 
-let redisClient;
+const redisClient = new Redis(
+  process.env.REDIS_URL || "redis://localhost:6379",
+);
 
-const connectToRedis = async () => {
+const connectToRedis = async (): Promise<void> => {
   try {
-    redisClient = new Redis(process.env.REDIS_URL || "redis://localhost:6379");
-
     redisClient.on("connect", () => {
       console.log("Redis connected successfully");
     });
 
-    redisClient.on("error", (error) => {
+    redisClient.on("error", (error: Error) => {
       console.log("Redis connection error:", error.message);
     });
 
-    // test the connection
     await redisClient.ping();
-  } catch (error) {
+  } catch (error: unknown) {
     console.log("Error connecting to Redis:", error);
     process.exit(1);
   }
