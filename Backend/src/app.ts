@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import authRouter from "./routes/auth.routes.js";
+import interviewRouter from "./routes/interview.routes.js";
 
 const app = express();
 
@@ -21,5 +22,6 @@ app.use(cookieParser());
 
 // api routes
 app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/interview", interviewRouter);
 
 export { app };
