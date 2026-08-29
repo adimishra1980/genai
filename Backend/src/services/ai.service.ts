@@ -86,6 +86,11 @@ const interviewReportSchema = z.object({
     .describe(
       "A day-wise preparation plan for the candidate to follow in order to prepare for the interview effectively",
     ),
+  title: z
+    .string()
+    .describe(
+      "Title of the interview report, i.e. the role and company for which the interview report is generated",
+    ),
 });
 
 type InterviewReport = z.infer<typeof interviewReportSchema>;
