@@ -1,9 +1,42 @@
 import { useState, useRef } from "react";
-import "../styles/home.scss";
 import { useNavigate } from "react-router";
 
-const Home = () => {
+import "../styles/home.scss";
+import { useInterview } from "../hooks/useInterview";
+import { LoaderCircle } from "lucide-react";
 
+const Home = () => {
+  const [jobDescription, setJobDescription] = useState("");
+  const [selfDescription, setSelfDescription] = useState("");
+  const resumeInputRef = useRef<HTMLInputElement>(null);
+
+  const navigate = useNavigate();
+  const { loading, generateReport } = useInterview();
+
+  const handleGenerateReport = async () => {
+    const resumeFile = resumeInputRef.current?.files![0];
+
+    const data = await generateReport({
+      resume: resumeFile!,
+      jobDescription,
+      selfDescription,
+    });
+
+    if (data?._id) {
+      navigate(`/interview/${data._id}`);
+    }
+  };
+
+  if (loading) {
+    return (
+      <main className="loading-screen">
+        <h1>Loading your interview plan...</h1>
+        <div className="loader-container">
+          <LoaderCircle />
+        </div>
+      </main>
+    );
+  }
 
   return (
     <div className="home-page">
@@ -44,6 +77,8 @@ const Home = () => {
               <span className="badge badge--required">Required</span>
             </div>
             <textarea
+              value={jobDescription}
+              onChange={(e) => setJobDescription(e.target.value)}
               className="panel__textarea"
               placeholder={`Paste the full job description here...\ne.g. 'Senior Frontend Engineer at Google requires proficiency in React, TypeScript, and large-scale system design...'`}
               maxLength={5000}
@@ -105,6 +140,7 @@ const Home = () => {
                 </p>
                 <p className="dropzone__subtitle">PDF or DOCX (Max 5MB)</p>
                 <input
+                  ref={resumeInputRef}
                   hidden
                   type="file"
                   id="resume"
@@ -125,6 +161,8 @@ const Home = () => {
                 Quick Self-Description
               </label>
               <textarea
+                value={selfDescription}
+                onChange={(e) => setSelfDescription(e.target.value)}
                 id="selfDescription"
                 name="selfDescription"
                 className="panel__textarea panel__textarea--short"
@@ -175,7 +213,11 @@ const Home = () => {
           <span className="footer-info">
             AI-Powered Strategy Generation &bull; Approx 30s
           </span>
-          <button className="generate-btn">
+          <button
+            onClick={handleGenerateReport}
+            disabled={loading}
+            className="generate-btn"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="16"
@@ -185,7 +227,7 @@ const Home = () => {
             >
               <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" />
             </svg>
-            Generate My Interview Strategy
+            {loading ? "Generating..." : "Generate My Interview Strategy"}
           </button>
         </div>
       </div>

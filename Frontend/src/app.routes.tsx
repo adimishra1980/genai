@@ -3,6 +3,7 @@ import Register from "./features/auth/pages/Register.tsx";
 import Login from "./features/auth/pages/Login.tsx";
 import Protected from "./features/auth/components/Protected.tsx";
 import Home from "./features/interview/pages/Home.tsx";
+import Interview from "./features/interview/pages/Interview.tsx";
 
 export const router = createBrowserRouter([
   {
@@ -21,4 +22,12 @@ export const router = createBrowserRouter([
       </Protected>
     ),
   },
+  {
+    path: "/interview/:interviewId",
+    element: (
+      <Protected>
+        <Interview />
+      </Protected>
+    )
+  }
 ]);
