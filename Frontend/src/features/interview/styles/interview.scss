@@ -484,7 +484,7 @@ $severity-low: #3fb950;
   align-items: center;
 }
 
-.interview-error__content{
+.interview-error__content {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -492,15 +492,29 @@ $severity-low: #3fb950;
 }
 
 // ── Loading classes ─────────────────────────────────────────────────────────────
-.interview-loading{
+.interview-loading {
   height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-}
-.interview-loading__content{
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  &__spinner {
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+    from {
+      transform: rotate(0deg);
+    }
+  }
 }

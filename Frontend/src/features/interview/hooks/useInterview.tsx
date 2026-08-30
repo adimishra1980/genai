@@ -6,6 +6,8 @@ import {
   getAllInterviewReports,
   GenerateInterviewReportRequest,
   GetInterviewReportByIdRequest,
+  GenerateResumePDFRequest,
+  generateResumePDF,
 } from "../services/interview.api.ts";
 import { AxiosError } from "axios";
 import type { InterviewReport } from "../types/interview.types.ts";
@@ -104,6 +106,35 @@ export const useInterview = () => {
     }
   };
 
+  const getResumePdf = async ({
+    interviewReportId,
+  }: GenerateResumePDFRequest): Promise<void> => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await generateResumePDF({ interviewReportId });
+      const url = window.URL.createObjectURL(
+        new Blob([response], { type: "application/pdf" }),
+      );
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `resume_${interviewReportId}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+    } catch (error: unknown) {
+      console.log(error);
+
+      if (error instanceof AxiosError) {
+        setError(error.response?.data?.message || "Failed to get resume PDF");
+      } else {
+        setError("Failed to get resume PDF");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     loading,
     error,
@@ -112,5 +143,6 @@ export const useInterview = () => {
     generateReport,
     getReportById,
     getAllReports,
+    getResumePdf,
   };
 };

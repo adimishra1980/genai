@@ -83,3 +83,24 @@ export const getAllInterviewReports =
       await api.get<GetAllInterviewReportsResponse>(`/api/v1/interview/`);
     return response.data;
   };
+
+export interface GenerateResumePDFRequest {
+  interviewReportId: string;
+}
+
+/**
+ * @description Service to generate resume PDF.
+ */
+export const generateResumePDF = async ({
+  interviewReportId,
+}: GenerateResumePDFRequest) => {
+  const response = await api.post(
+    `/api/v1/interview/resume/pdf/${interviewReportId}`,
+    {},
+    {
+      responseType: "blob",
+    },
+  );
+
+  return response.data;
+};

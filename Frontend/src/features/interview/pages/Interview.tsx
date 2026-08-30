@@ -11,7 +11,8 @@ import { NAV_ITEMS } from "../constants/navItems.tsx";
 
 const Interview = () => {
   const { interviewId } = useParams<{ interviewId: string }>();
-  const { report, loading, error, getReportById } = useInterview();
+  const { report, loading, error, getReportById, getResumePdf } =
+    useInterview();
   const [activeNav, setActiveNav] = useState("technical");
   const navigate = useNavigate();
 
@@ -21,12 +22,29 @@ const Interview = () => {
     }
   }, [interviewId]);
 
+  const handleDownloadPDF = () => {
+    if (interviewId) {
+      getResumePdf({ interviewReportId: interviewId });
+    }
+  };
+
   if (loading && !report) {
     return (
       <div className="interview-loading">
         <div className="interview-loading__content">
           <LoaderCircle className="interview-loading__spinner" />
           <p>Analyzing interview plan...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="interview-loading">
+        <div className="interview-loading__content">
+          <p>Generating resume pdf...</p>
+          <LoaderCircle className="interview-loading__spinner" />
         </div>
       </div>
     );
@@ -91,7 +109,9 @@ const Interview = () => {
               </button>
             ))}
           </div>
-          <button className="button primary-button">
+
+          {/* generate resume pdf button */}
+          <button onClick={handleDownloadPDF} className="button primary-button">
             <svg
               height={"0.8rem"}
               style={{ marginRight: "0.8rem" }}
