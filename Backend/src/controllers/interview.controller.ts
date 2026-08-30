@@ -1,7 +1,11 @@
-import { PDFParse } from "pdf-parse";
-import { generateInterviewReport } from "../services/ai.service.js";
-import interviewReportModel from "../models/interviewReport.model.js";
 import type { Request, Response } from "express";
+import { PDFParse } from "pdf-parse";
+
+import {
+  generateInterviewReport,
+  generateResumePDF,
+} from "../services/ai.service.js";
+import interviewReportModel from "../models/interviewReport.model.js";
 
 /**
  * @description Controller to generate interview report based on user self description, resume and job description.
@@ -137,6 +141,55 @@ export const getAllInterviewReportsController = async (
     return res.status(500).json({
       success: false,
       message: "Something went wrong while fetching interview reports",
+    });
+  }
+};
+
+/**
+ * @description Controller to generate resume PDF based on user self description, resume and job description.
+ */
+export const generateResumePdfController = async (
+  req: Request,
+  res: Response,
+) => {
+  try {
+    const { interviewReportId } = req.params;
+
+    const interviewReport =
+      await interviewReportModel.findById(interviewReportId);
+
+    if (!interviewReport) {
+      return res.status(404).json({
+        message: "Interview report not found.",
+      });
+    }
+
+    const { resume, selfDescription, jobDescription } = interviewReport;
+
+    if (!resume || !selfDescription || !jobDescription) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Resume, selfDescription and jobDescription not found in the interview report.",
+      });
+    }
+
+    const pdfBuffer = await generateResumePDF({
+      resume,
+      selfDescription,
+      jobDescription,
+    });
+
+    res.set({
+      "Content-Type": "application/pdf",
+      "Content-Disposition": `attachment; filename=resume_${interviewReportId}.pdf`,
+    });
+    res.send(pdfBuffer);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong while generating resume PDF",
     });
   }
 };
