@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router";
 
 import "../styles/home.scss";
@@ -11,7 +11,11 @@ const Home = () => {
   const resumeInputRef = useRef<HTMLInputElement>(null);
 
   const navigate = useNavigate();
-  const { loading, generateReport } = useInterview();
+  const { loading, reports, generateReport, getAllReports } = useInterview();
+
+  useEffect(() => {
+    getAllReports();
+  }, []);
 
   const handleGenerateReport = async () => {
     const resumeFile = resumeInputRef.current?.files![0];
@@ -233,7 +237,7 @@ const Home = () => {
       </div>
 
       {/* Recent Reports List */}
-      {/* {reports.length > 0 && (
+      {reports.length > 0 && (
         <section className="recent-reports">
           <h2>My Recent Interview Plans</h2>
           <ul className="reports-list">
@@ -256,7 +260,7 @@ const Home = () => {
             ))}
           </ul>
         </section>
-      )} */}
+      )}
 
       {/* Page Footer */}
       <footer className="page-footer">
