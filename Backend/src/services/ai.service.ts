@@ -89,7 +89,7 @@ const interviewReportSchema = z.object({
   title: z
     .string()
     .describe(
-      "Title of the interview report, i.e. the role and company for which the interview report is generated",
+      "The title of the job for which the interview report is generated",
     ),
 });
 
